@@ -1,0 +1,884 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator &amp; Mini Games — Gerick Julius</title>
+    <meta name="description" content="Kalkulator dan kumpulan mini games di ruang digital Gerick Julius Kwok">
+
+    <!-- Theme init (mencegah flash tema saat halaman dimuat) -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('gjk-theme');
+                var theme = saved || 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: {
+                            950: '#080B12',
+                            900: '#0B0F1A',
+                            800: '#111827',
+                            700: '#141B2E',
+                            600: '#1B2338',
+                            500: '#242E48',
+                        },
+                        brass: {
+                            50: '#FBF6E9',
+                            100: '#F3E6BE',
+                            200: '#E8D190',
+                            300: '#DCBB63',
+                            400: '#C9A24B',
+                            500: '#B08D3E',
+                            600: '#8C7031',
+                        },
+                        cream: '#EDEAE0',
+                    },
+                    fontFamily: {
+                        serif: ['Fraunces', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #0B0F1A;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201, 162, 75, 0.10), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 10%, rgba(201, 162, 75, 0.06), transparent);
+            font-feature-settings: "ss01" on;
+        }
+
+        .font-serif-italic {
+            font-family: 'Fraunces', serif;
+            font-style: italic;
+        }
+
+        ::selection {
+            background: #C9A24B;
+            color: #0B0F1A;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0B0F1A;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #242E48;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C9A24B;
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background .3s ease;
+        }
+
+        .nav-link.active .dot {
+            background: #C9A24B;
+        }
+
+        .nav-link.active .nav-label {
+            color: #EDEAE0;
+        }
+
+        .nav-link.active {
+            background: rgba(201, 162, 75, 0.08);
+        }
+
+        .seal {
+            background: conic-gradient(from 180deg, #E8D190, #C9A24B, #8C7031, #C9A24B, #E8D190);
+        }
+
+        .card-hover {
+            transition: transform .35s cubic-bezier(.2, .7, .2, 1), border-color .35s ease, box-shadow .35s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(201, 162, 75, 0.45);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+        }
+
+        .divider-line {
+            background: linear-gradient(90deg, rgba(201, 162, 75, 0.7), transparent);
+            height: 1px;
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .fade-in-item {
+            animation: itemIn .4s ease both;
+        }
+
+        @keyframes itemIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus,
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid #C9A24B;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* ================= CALCULATOR ================= */
+        .calc-btn {
+            transition: transform .15s ease, border-color .25s ease, background .25s ease;
+        }
+
+        .calc-btn:active {
+            transform: scale(.94);
+        }
+
+        .calc-display {
+            font-family: 'Fraunces', serif;
+        }
+
+        /* ================= RPS GAME ================= */
+        .rps-btn {
+            transition: transform .2s cubic-bezier(.2, .7, .2, 1), border-color .25s ease, background .25s ease;
+        }
+
+        .rps-btn:hover {
+            transform: translateY(-3px);
+            border-color: rgba(201, 162, 75, 0.5);
+        }
+
+        /* ================= THEME TOGGLE (Light / Dark) ================= */
+        html,
+        body {
+            transition: background-color .35s ease, color .35s ease;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 44px;
+            height: 26px;
+            border-radius: 999px;
+            border: 1px solid rgba(201, 162, 75, 0.4);
+            background: rgba(201, 162, 75, 0.08);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle .knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #C9A24B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .3s cubic-bezier(.2, .7, .2, 1);
+        }
+
+        .theme-toggle .knob svg {
+            width: 11px;
+            height: 11px;
+            color: #0B0F1A;
+        }
+
+        html[data-theme="light"] .theme-toggle .knob {
+            transform: translateX(18px);
+        }
+
+        .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        .theme-toggle .icon-moon {
+            display: flex;
+        }
+
+        html[data-theme="light"] .theme-toggle .icon-sun {
+            display: flex;
+        }
+
+        html[data-theme="light"] .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        /* ---- Light theme overrides ---- */
+        html[data-theme="light"] body {
+            background-color: #F7F4EC;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(176, 141, 62, 0.10), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 10%, rgba(176, 141, 62, 0.08), transparent);
+        }
+
+        html[data-theme="light"] .grain {
+            opacity: 0.02;
+        }
+
+        html[data-theme="light"] ::-webkit-scrollbar-track {
+            background: #F7F4EC;
+        }
+
+        html[data-theme="light"] ::-webkit-scrollbar-thumb {
+            background: #E8D190;
+        }
+
+        html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+            background: #B08D3E;
+        }
+
+        html[data-theme="light"] ::selection {
+            background: #B08D3E;
+            color: #FBF6E9;
+        }
+
+        html[data-theme="light"] [class~="text-cream"] {
+            color: #1B2338;
+        }
+
+        html[data-theme="light"] [class~="bg-ink-900/90"] {
+            background-color: rgba(255, 255, 255, 0.82);
+        }
+
+        html[data-theme="light"] [class~="bg-white/[0.02]"] {
+            background-color: rgba(27, 35, 56, 0.03);
+        }
+
+        html[data-theme="light"] [class~="bg-white/[0.03]"] {
+            background-color: rgba(27, 35, 56, 0.04);
+        }
+
+        html[data-theme="light"] [class~="text-white/70"] {
+            color: rgb(27 35 56 / 0.78);
+        }
+
+        html[data-theme="light"] [class~="text-white/60"] {
+            color: rgb(27 35 56 / 0.68);
+        }
+
+        html[data-theme="light"] [class~="text-white/50"] {
+            color: rgb(27 35 56 / 0.58);
+        }
+
+        html[data-theme="light"] [class~="text-white/40"] {
+            color: rgb(27 35 56 / 0.48);
+        }
+
+        html[data-theme="light"] [class~="text-white/30"] {
+            color: rgb(27 35 56 / 0.4);
+        }
+
+        html[data-theme="light"] [class~="text-white/25"] {
+            color: rgb(27 35 56 / 0.35);
+        }
+
+        html[data-theme="light"] [class~="text-white/20"] {
+            color: rgb(27 35 56 / 0.3);
+        }
+
+        html[data-theme="light"] [class~="border-white/10"] {
+            border-color: rgba(27, 35, 56, 0.12);
+        }
+
+        html[data-theme="light"] [class~="border-white/5"] {
+            border-color: rgba(27, 35, 56, 0.08);
+        }
+
+        html[data-theme="light"] [class~="text-brass-300"] {
+            color: #8C7031;
+        }
+
+        html[data-theme="light"] [class~="text-brass-400"] {
+            color: #8C7031;
+        }
+
+        html[data-theme="light"] [class~="text-brass-400/70"] {
+            color: rgb(140 112 49 / 0.85);
+        }
+
+        html[data-theme="light"] [class~="text-brass-400/80"] {
+            color: rgb(140 112 49 / 0.9);
+        }
+
+        html[data-theme="light"] [class~="border-brass-400/30"] {
+            border-color: rgba(140, 112, 49, 0.35);
+        }
+
+        html[data-theme="light"] [class~="border-brass-400/40"] {
+            border-color: rgba(140, 112, 49, 0.4);
+        }
+
+        html[data-theme="light"] [class~="bg-brass-400/10"] {
+            background-color: rgba(140, 112, 49, 0.12);
+        }
+
+        html[data-theme="light"] .nav-link.active {
+            background: rgba(140, 112, 49, 0.10);
+        }
+
+        html[data-theme="light"] .card-hover:hover {
+            box-shadow: 0 20px 40px -20px rgba(27, 35, 56, 0.18);
+        }
+
+        html[data-theme="light"] input:focus,
+        html[data-theme="light"] textarea:focus,
+        html[data-theme="light"] select:focus,
+        html[data-theme="light"] button:focus-visible,
+        html[data-theme="light"] a:focus-visible {
+            outline-color: #8C7031;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-cream min-h-screen relative">
+    <div class="grain"></div>
+
+    <!-- ===================== TOP NAVIGATION ===================== -->
+    <header class="sticky top-0 z-40 bg-ink-900/90 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-5 sm:px-8 lg:px-10">
+            <div class="flex items-center justify-between h-[72px]">
+                <div class="flex items-center gap-3">
+                    <a href="index.html"
+                        class="seal w-9 h-9 rounded-full flex items-center justify-center shadow-lg shrink-0 overflow-hidden">
+                        <span class="font-serif font-semibold text-ink-900 text-sm">GJK</span>
+                    </a>
+                    <div class="leading-tight">
+                        <p class="font-serif text-lg tracking-wide">Gerick Julius</p>
+                        <p class="text-[10px] uppercase tracking-[0.2em] text-brass-400/70 hidden sm:block">Ruang
+                            Digital</p>
+                    </div>
+                </div>
+
+                <nav class="hidden lg:flex items-center gap-1">
+                    <a href="index.html" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg group">
+                        <span class="dot"></span>
+                        <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Dashboard</span>
+                    </a>
+                    <a href="profil.html" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg group">
+                        <span class="dot"></span>
+                        <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Profil</span>
+                    </a>
+                    <a href="informatika.html" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg group">
+                        <span class="dot"></span>
+                        <span
+                            class="nav-label text-sm text-white/60 group-hover:text-cream transition">Informatika</span>
+                    </a>
+                    <a href="bindo.html" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg group">
+                        <span class="dot"></span>
+                        <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Bahasa
+                            Indonesia</span>
+                    </a>
+                    <a href="kalkulator-games.html"
+                        class="nav-link active flex items-center gap-2 px-4 py-2 rounded-lg group">
+                        <span class="dot"></span>
+                        <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Kalkulator &amp;
+                            Games</span>
+                    </a>
+                </nav>
+
+                <div class="flex items-center gap-2">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Ganti mode terang/gelap"
+                        title="Ganti mode terang/gelap">
+                        <span class="knob">
+                            <span class="icon-moon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                                </svg>
+                            </span>
+                            <span class="icon-sun">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.06 1.06l-1.591 1.591a.75.75 0 1 0 1.06 1.06l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06L6.166 5.107a.75.75 0 1 0-1.06 1.06l1.59 1.591Z" />
+                                </svg>
+                            </span>
+                        </span>
+                    </button>
+
+                    <button id="menuToggle" aria-label="Buka menu" class="lg:hidden p-2 text-brass-400">
+                        <svg id="iconOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                        </svg>
+                        <svg id="iconClose" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile dropdown nav -->
+            <nav id="mobileNav" class="hidden lg:hidden flex flex-col gap-1 pb-5">
+                <a href="index.html" class="nav-link flex items-center gap-3 px-3 py-3 rounded-lg group">
+                    <span class="dot"></span>
+                    <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Dashboard</span>
+                </a>
+                <a href="profil.html" class="nav-link flex items-center gap-3 px-3 py-3 rounded-lg group">
+                    <span class="dot"></span>
+                    <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Profil</span>
+                </a>
+                <a href="informatika.html" class="nav-link flex items-center gap-3 px-3 py-3 rounded-lg group">
+                    <span class="dot"></span>
+                    <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Informatika</span>
+                </a>
+                <a href="bindo.html" class="nav-link flex items-center gap-3 px-3 py-3 rounded-lg group">
+                    <span class="dot"></span>
+                    <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Bahasa
+                        Indonesia</span>
+                </a>
+                <a href="kalkulator-games.html"
+                    class="nav-link active flex items-center gap-3 px-3 py-3 rounded-lg group">
+                    <span class="dot"></span>
+                    <span class="nav-label text-sm text-white/60 group-hover:text-cream transition">Kalkulator &amp;
+                        Games</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <main class="min-h-screen relative z-10 px-6 sm:px-10 lg:px-16 py-14 lg:py-20 max-w-5xl mx-auto">
+
+        <p class="text-brass-400 text-xs tracking-[0.3em] uppercase mb-5 fade-in-item">Ruang bermain</p>
+        <h1 class="font-serif font-semibold text-4xl sm:text-5xl leading-[1.08] mb-3 fade-in-item"
+            style="animation-delay:.05s">
+            Kalkulator &amp; <span class="text-brass-400 font-serif-italic font-medium">Mini Games</span>
+        </h1>
+        <div class="divider-line w-24 my-8 fade-in-item" style="animation-delay:.1s"></div>
+        <p class="text-white/60 max-w-2xl mb-14 fade-in-item" style="animation-delay:.15s">
+            Sela-sela mengerjakan tugas, mampir dulu ke sini — ada kalkulator sederhana dan beberapa mini games
+            untuk sekadar iseng.
+        </p>
+
+        <!-- ===================== KALKULATOR ===================== -->
+        <section class="mb-16 fade-in-item" style="animation-delay:.2s">
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="h-5 w-5 text-brass-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 7.5h6M9 11.25h.008v.008H9v-.008Zm0 3h.008v.008H9v-.008Zm0 3h.008v.008H9v-.008Zm3-6h.008v.008H12v-.008Zm0 3h.008v.008H12v-.008Zm0 3h.008v.008H12v-.008Zm3-6h.008v.008H15v-.008Zm0 3h.008v.008H15v-.008Zm0 3h.008v.008H15v-.008ZM6 3.75h12A1.5 1.5 0 0 1 19.5 5.25v13.5a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V5.25A1.5 1.5 0 0 1 6 3.75Z" />
+                </svg>
+                <h2 class="font-serif text-2xl">Kalkulator</h2>
+            </div>
+
+            <div class="max-w-sm border border-white/10 rounded-2xl p-5 bg-white/[0.02]">
+                <div class="rounded-xl border border-white/10 bg-ink-950/60 px-4 py-5 mb-4 text-right overflow-hidden">
+                    <p id="calcExpr" class="text-white/40 text-xs h-4 truncate">&nbsp;</p>
+                    <p id="calcDisplay" class="calc-display text-3xl sm:text-4xl font-medium truncate">0</p>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2" id="calcPad">
+                    <button data-calc="clear"
+                        class="calc-btn col-span-2 py-3 rounded-xl border border-brass-400/30 text-brass-400 text-sm tracking-wide">AC</button>
+                    <button data-calc="back"
+                        class="calc-btn py-3 rounded-xl border border-white/10 text-cream/80 bg-white/[0.02]">⌫</button>
+                    <button data-op="/"
+                        class="calc-btn py-3 rounded-xl border border-brass-400/30 text-brass-400">÷</button>
+
+                    <button data-num="7"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">7</button>
+                    <button data-num="8"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">8</button>
+                    <button data-num="9"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">9</button>
+                    <button data-op="*"
+                        class="calc-btn py-3 rounded-xl border border-brass-400/30 text-brass-400">×</button>
+
+                    <button data-num="4"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">4</button>
+                    <button data-num="5"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">5</button>
+                    <button data-num="6"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">6</button>
+                    <button data-op="-"
+                        class="calc-btn py-3 rounded-xl border border-brass-400/30 text-brass-400">−</button>
+
+                    <button data-num="1"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">1</button>
+                    <button data-num="2"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">2</button>
+                    <button data-num="3"
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">3</button>
+                    <button data-op="+"
+                        class="calc-btn row-span-2 py-3 rounded-xl border border-brass-400/30 text-brass-400">+</button>
+
+                    <button data-num="0"
+                        class="calc-btn col-span-2 py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">0</button>
+                    <button data-num="."
+                        class="calc-btn py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-brass-400/40">,</button>
+
+                    <button data-calc="equals"
+                        class="calc-btn col-span-4 mt-1 py-3 rounded-xl bg-brass-400 text-ink-900 font-semibold tracking-wide">=</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider-line w-full my-4 fade-in-item" style="animation-delay:.22s"></div>
+
+        <!-- ===================== MINI GAMES ===================== -->
+        <section class="mt-14 fade-in-item" style="animation-delay:.25s">
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="h-5 w-5 text-brass-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.75 15.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 0h-1.5m1.5 0h1.5m-1.5-3v6m9-6h1.5a2.25 2.25 0 0 1 2.25 2.25v.75a2.25 2.25 0 0 1-2.25 2.25h-1.5m0-5.25v5.25m0-5.25-1.72-1.72a1.5 1.5 0 0 0-1.06-.44H8.03a1.5 1.5 0 0 0-1.06.44L5.25 12M8 15h4" />
+                </svg>
+                <h2 class="font-serif text-2xl">Mini Games</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- Game 1: Tebak Angka -->
+                <div class="card-hover border border-white/10 rounded-2xl p-6 bg-white/[0.02]">
+                    <p class="text-brass-400 text-xs tracking-[0.25em] uppercase mb-2">Game 1</p>
+                    <p class="font-serif text-xl mb-2">Tebak Angka</p>
+                    <p class="text-white/50 text-sm mb-5">Aku sedang memikirkan sebuah angka antara 1–100. Coba
+                        tebak!</p>
+
+                    <div class="flex gap-2 mb-3">
+                        <input id="guessInput" type="number" min="1" max="100" placeholder="Tebakanmu..."
+                            class="flex-1 min-w-0 bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-cream placeholder-white/30 focus:border-brass-400/50">
+                        <button id="guessBtn"
+                            class="shrink-0 px-4 py-2 rounded-lg bg-brass-400 text-ink-900 text-sm font-semibold">Tebak</button>
+                    </div>
+
+                    <p id="guessMsg" class="text-sm text-white/60 mb-1">Percobaan ke-1. Ayo mulai menebak!</p>
+                    <button id="guessReset"
+                        class="text-xs text-brass-400/80 hover:text-brass-400 underline underline-offset-2">Main
+                        ulang</button>
+                </div>
+
+                <!-- Game 2: Batu Gunting Kertas -->
+                <div class="card-hover border border-white/10 rounded-2xl p-6 bg-white/[0.02]">
+                    <p class="text-brass-400 text-xs tracking-[0.25em] uppercase mb-2">Game 2</p>
+                    <p class="font-serif text-xl mb-2">Batu Gunting Kertas</p>
+                    <p class="text-white/50 text-sm mb-5">Lawan komputer, siapa lebih hoki hari ini?</p>
+
+                    <div class="flex gap-2 mb-4">
+                        <button data-rps="Batu"
+                            class="rps-btn flex-1 py-3 rounded-xl border border-white/10 bg-white/[0.02] text-2xl">🪨</button>
+                        <button data-rps="Gunting"
+                            class="rps-btn flex-1 py-3 rounded-xl border border-white/10 bg-white/[0.02] text-2xl">✂️</button>
+                        <button data-rps="Kertas"
+                            class="rps-btn flex-1 py-3 rounded-xl border border-white/10 bg-white/[0.02] text-2xl">📄</button>
+                    </div>
+
+                    <p id="rpsMsg" class="text-sm text-white/60 mb-1">Pilih salah satu untuk mulai bermain.</p>
+                    <p id="rpsScore" class="text-xs text-brass-400/80">Skor — Kamu: 0 · Komputer: 0</p>
+                </div>
+
+                <!-- Game 3: Tebak Bilangan Genap/Ganjil (kilat) -->
+                <div class="card-hover border border-white/10 rounded-2xl p-6 bg-white/[0.02] md:col-span-2">
+                    <p class="text-brass-400 text-xs tracking-[0.25em] uppercase mb-2">Game 3</p>
+                    <p class="font-serif text-xl mb-2">Genap atau Ganjil?</p>
+                    <p class="text-white/50 text-sm mb-5">Angka akan muncul — tentukan cepat sebelum waktu habis.</p>
+
+                    <div class="flex flex-wrap items-center gap-4 mb-4">
+                        <p id="ogNumber" class="calc-display font-serif text-4xl text-brass-400 w-16 text-center">?
+                        </p>
+                        <div class="flex gap-2">
+                            <button data-og="genap"
+                                class="rps-btn px-5 py-2 rounded-xl border border-white/10 bg-white/[0.02] text-sm">Genap</button>
+                            <button data-og="ganjil"
+                                class="rps-btn px-5 py-2 rounded-xl border border-white/10 bg-white/[0.02] text-sm">Ganjil</button>
+                        </div>
+                        <button id="ogStart"
+                            class="px-4 py-2 rounded-xl border border-brass-400/30 text-brass-400 text-sm">Mulai</button>
+                    </div>
+
+                    <p id="ogMsg" class="text-sm text-white/60">Tekan "Mulai" untuk bermain.</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* ================= THEME TOGGLE ================= */
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('gjk-theme', next); } catch (e) { }
+        });
+
+        /* ================= MOBILE MENU ================= */
+        const mobileNav = document.getElementById('mobileNav');
+        const menuToggle = document.getElementById('menuToggle');
+        const iconOpen = document.getElementById('iconOpen');
+        const iconClose = document.getElementById('iconClose');
+
+        function closeMobileMenu() {
+            mobileNav.classList.add('hidden');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            const isHidden = mobileNav.classList.contains('hidden');
+            if (isHidden) {
+                mobileNav.classList.remove('hidden');
+                iconOpen.classList.add('hidden');
+                iconClose.classList.remove('hidden');
+            } else {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) closeMobileMenu();
+        });
+
+        /* ================= KALKULATOR ================= */
+        (function () {
+            const exprEl = document.getElementById('calcExpr');
+            const displayEl = document.getElementById('calcDisplay');
+            let current = '0';
+            let expr = '';
+            let resetNext = false;
+
+            function fmt(n) {
+                if (!isFinite(n)) return 'Error';
+                let s = parseFloat(n.toFixed(10)).toString();
+                return s.replace('.', ',');
+            }
+
+            function render() {
+                displayEl.textContent = current;
+                exprEl.textContent = expr || '\u00A0';
+            }
+
+            document.getElementById('calcPad').addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                if (btn.dataset.num !== undefined) {
+                    const num = btn.dataset.num;
+                    if (resetNext) { current = '0'; resetNext = false; }
+                    if (num === '.') {
+                        if (!current.includes(',')) current += ',';
+                    } else if (current === '0') {
+                        current = num;
+                    } else {
+                        current += num;
+                    }
+                }
+
+                if (btn.dataset.op !== undefined) {
+                    expr = current.replace(',', '.') + ' ' + btn.dataset.op + ' ';
+                    resetNext = true;
+                }
+
+                if (btn.dataset.calc === 'clear') {
+                    current = '0'; expr = ''; resetNext = false;
+                }
+
+                if (btn.dataset.calc === 'back') {
+                    current = current.length > 1 ? current.slice(0, -1) : '0';
+                }
+
+                if (btn.dataset.calc === 'equals') {
+                    try {
+                        const full = expr + current.replace(',', '.');
+                        const safe = full.replace(/[^-()\d/*+.\s]/g, '');
+                        const result = Function('"use strict"; return (' + safe + ')')();
+                        current = fmt(result);
+                        expr = full.replace(/\*/g, '×').replace(/\//g, '÷') + ' =';
+                        resetNext = true;
+                    } catch (err) {
+                        current = 'Error';
+                        resetNext = true;
+                    }
+                }
+
+                render();
+            });
+
+            render();
+        })();
+
+        /* ================= GAME 1: TEBAK ANGKA ================= */
+        (function () {
+            const msg = document.getElementById('guessMsg');
+            const input = document.getElementById('guessInput');
+            const btn = document.getElementById('guessBtn');
+            const resetBtn = document.getElementById('guessReset');
+            let target = Math.floor(Math.random() * 100) + 1;
+            let tries = 1;
+
+            function attempt() {
+                const val = parseInt(input.value, 10);
+                if (!val || val < 1 || val > 100) {
+                    msg.textContent = 'Masukkan angka antara 1 sampai 100 ya.';
+                    return;
+                }
+                if (val === target) {
+                    msg.textContent = 'Tepat! Angkanya ' + target + '. Ketemu dalam ' + tries + ' percobaan 🎉';
+                } else if (val < target) {
+                    tries++;
+                    msg.textContent = 'Terlalu kecil. Percobaan ke-' + tries + ', coba lagi.';
+                } else {
+                    tries++;
+                    msg.textContent = 'Terlalu besar. Percobaan ke-' + tries + ', coba lagi.';
+                }
+                input.value = '';
+                input.focus();
+            }
+
+            btn.addEventListener('click', attempt);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
+
+            resetBtn.addEventListener('click', () => {
+                target = Math.floor(Math.random() * 100) + 1;
+                tries = 1;
+                msg.textContent = 'Angka baru sudah siap. Percobaan ke-1. Ayo tebak!';
+                input.value = '';
+            });
+        })();
+
+        /* ================= GAME 2: BATU GUNTING KERTAS ================= */
+        (function () {
+            const msg = document.getElementById('rpsMsg');
+            const scoreEl = document.getElementById('rpsScore');
+            const options = ['Batu', 'Gunting', 'Kertas'];
+            const emoji = { Batu: '🪨', Gunting: '✂️', Kertas: '📄' };
+            let userScore = 0, cpuScore = 0;
+
+            function decide(user, cpu) {
+                if (user === cpu) return 'draw';
+                if (
+                    (user === 'Batu' && cpu === 'Gunting') ||
+                    (user === 'Gunting' && cpu === 'Kertas') ||
+                    (user === 'Kertas' && cpu === 'Batu')
+                ) return 'win';
+                return 'lose';
+            }
+
+            document.querySelectorAll('[data-rps]').forEach(b => {
+                b.addEventListener('click', () => {
+                    const user = b.dataset.rps;
+                    const cpu = options[Math.floor(Math.random() * 3)];
+                    const result = decide(user, cpu);
+
+                    if (result === 'draw') {
+                        msg.textContent = 'Seri! Kamu ' + emoji[user] + ' vs Komputer ' + emoji[cpu] + '.';
+                    } else if (result === 'win') {
+                        userScore++;
+                        msg.textContent = 'Kamu menang! ' + emoji[user] + ' mengalahkan ' + emoji[cpu] + '.';
+                    } else {
+                        cpuScore++;
+                        msg.textContent = 'Kamu kalah. ' + emoji[cpu] + ' mengalahkan ' + emoji[user] + '.';
+                    }
+                    scoreEl.textContent = 'Skor — Kamu: ' + userScore + ' · Komputer: ' + cpuScore;
+                });
+            });
+        })();
+
+        /* ================= GAME 3: GENAP / GANJIL ================= */
+        (function () {
+            const numEl = document.getElementById('ogNumber');
+            const msg = document.getElementById('ogMsg');
+            const startBtn = document.getElementById('ogStart');
+            let current = null;
+            let score = 0;
+            let round = 0;
+
+            function nextNumber() {
+                current = Math.floor(Math.random() * 98) + 1;
+                numEl.textContent = current;
+            }
+
+            startBtn.addEventListener('click', () => {
+                score = 0; round = 0;
+                nextNumber();
+                msg.textContent = 'Skor: 0. Tentukan angka di atas genap atau ganjil.';
+            });
+
+            document.querySelectorAll('[data-og]').forEach(b => {
+                b.addEventListener('click', () => {
+                    if (current === null) {
+                        msg.textContent = 'Tekan "Mulai" dulu ya.';
+                        return;
+                    }
+                    const choice = b.dataset.og;
+                    const isGenap = current % 2 === 0;
+                    const correct = (choice === 'genap' && isGenap) || (choice === 'ganjil' && !isGenap);
+                    round++;
+                    if (correct) score++;
+                    msg.textContent = (correct ? 'Benar! ' : 'Kurang tepat, ') + current + ' itu ' +
+                        (isGenap ? 'genap' : 'ganjil') + '. Skor: ' + score + '/' + round;
+                    nextNumber();
+                });
+            });
+        })();
+    </script>
+</body>
+
+</html>
